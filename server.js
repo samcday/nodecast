@@ -18,6 +18,17 @@ var argv = require('optimist')
 var name = argv.name;
 var intf = argv.intf;
 
+function getIPAddress() {
+	var inter = require('os').networkInterfaces()[intf];
+	for (var j in inter) {
+		if (inter[j].family === 'IPv4' && !inter[j].internal) {
+			return inter[j].address
+		}
+	}
+}
+
+var addr = getIPAddress();
+
 app.set('port', 8008);
 
 app.use(function(req, res, next) {
@@ -45,7 +56,7 @@ app.disable('x-powered-by');
 
 var server = http.createServer(app);
 
-server.listen(app.get('port'), function(){
+server.listen(app.get('port'), addr, function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
@@ -126,16 +137,6 @@ wssRouter.mount(regex, '', function(request) {
 	}
 });
 
-function getIPAddress() {
-	var inter = require('os').networkInterfaces()[intf];
-	for (var j in inter) {
-		if (inter[j].family === 'IPv4' && !inter[j].internal) {
-			return inter[j].address
-		}
-	}
-}
-
-var addr = getIPAddress();
 console.log(addr);
 setupApps(addr);
 setupRoutes(addr);
