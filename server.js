@@ -12,10 +12,11 @@ var ssdp = require("peer-ssdp"),
 	bodyParser = require('body-parser')
 	methodOverride = require('method-override');
 var argv = require('optimist')
-    .usage('Usage: $0 --name [name]')
-    .demand(['name'])
+    .usage('Usage: $0 --name [name] --intf [intf]')
+    .demand(['name', 'intf'])
     .argv;
 var name = argv.name;
+var intf = argv.intf;
 
 app.set('port', 8008);
 
@@ -126,14 +127,10 @@ wssRouter.mount(regex, '', function(request) {
 });
 
 function getIPAddress() {
-	var n = require('os').networkInterfaces();
-	var ip = []
-	for (var k in n) {
-		var inter = n[k];
-		for (var j in inter) {
-			if (inter[j].family === 'IPv4' && !inter[j].internal) {
-				return inter[j].address
-			}
+	var inter = require('os').networkInterfaces()[intf];
+	for (var j in inter) {
+		if (inter[j].family === 'IPv4' && !inter[j].internal) {
+			return inter[j].address
 		}
 	}
 }
